@@ -43,7 +43,7 @@
         startCamZ: 12.8,
         endCamZ: 6.5,
         startFov: 31,
-        endFov: 58
+        endFov: 10
       },
       card: {
         width: 200,

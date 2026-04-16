@@ -34,17 +34,6 @@
         fov: 31,
         orthoZoom: 1.0
       },
-      scrollCamera: {
-        enabled: true,
-        start: 0.10,
-        end: 0.90,
-        startCamY: 6.8,
-        endCamY: 2.0,
-        startCamZ: 12.8,
-        endCamZ: 6.5,
-        startFov: 31,
-        endFov: 58
-      },
       card: {
         width: 200,
         height: 149,

@@ -25,56 +25,54 @@
         ozoomGroup: $('[data-el="ozoom-group"]')
       };
 
-const CFG = {
-  camType: 'perspective',
-  camY: 6.8,
-  camZ: 12.8,
-  fov: 31,
-  orthoZoom: 1.0,
+      const CFG = {
+        camType: 'perspective',
+        camY: 6.8,
+        camZ: 12.8,
+        fov: 31,
+        orthoZoom: 1.0,
 
-  scrollCamEnabled: true,
-  scrollCamStart: 0.08,
-  scrollCamEnd: 1.0,
-  scrollStartCamY: 6.8,
-  scrollEndCamY: 20.0,
-  scrollStartCamZ: 12.8,
-  scrollEndCamZ: 17.1,
-  scrollStartFov: 32,
-  scrollEndFov: 23,
+        scrollCamEnabled: true,
+        scrollCamStart: 0.08,
+        scrollCamEnd: 0.72,
+        scrollStartCamY: 6.8,
+        scrollEndCamY: 2.0,
+        scrollStartCamZ: 12.8,
+        scrollEndCamZ: 6.5,
+        scrollStartFov: 31,
+        scrollEndFov: 58,
 
-  hoverCamXStrength: 1.2,
-  hoverCamYStrength: 0.7,
+        hoverCamXStrength: 1.2,
+        hoverCamYStrength: 0.7,
 
-  cardW: 200,
-  cardH: 149,
-  padding: 0,
-  cardCorner: 0.5,
-  cardRotX: 2,
-  cardRotY: -72,
-  cardRotZ: 0,
+        cardW: 200,
+        cardH: 149,
+        padding: 0,
+        cardCorner: 0.5,
+        cardRotX: 4,
+        cardRotY: -90,
+        cardRotZ: 0,
 
-  radius: 2.9,
-  multiplier: 2,
-  animSpeed: 1.11,
-  animating: true,
+        radius: 2.1,
+        multiplier: 2,
+        animSpeed: 1.11,
+        animating: true,
 
-  bgColor: '#ff0000',
-  showLabels: true,
-  showPreview: true,
-  showInfoBadge: true,
+        bgColor: '#ff0000',
+        showLabels: true,
+        showPreview: true,
+        globalFit: 'cover',
 
-  globalFit: 'cover',
-
-  selectorAngle: 325,
-  selectorTolerance: 8,
-  showSelectorLine: true,
-  selectorLineColor: '#111111',
-  selectorLineWidth: 2,
-  selectorLineOpacity: 0.45,
-  selectorLineBlend: 'difference',
-  selectorStart: 0.14,
-  selectorEnd: 0.50
-};
+        selectorAngle: 325,
+        selectorTolerance: 8,
+        showSelectorLine: true,
+        selectorLineColor: '#111111',
+        selectorLineWidth: 2,
+        selectorLineOpacity: 0.45,
+        selectorLineBlend: 'difference',
+        selectorStart: 0.14,
+        selectorEnd: 0.5
+      };
 
       const BASE = [
         {
@@ -813,294 +811,35 @@ const CFG = {
         if (hoveredIdx >= 0) updPreview(hoveredIdx);
       }
 
-/* updated */
-function upd(key,val){
-  const ints = ['multiplier','cardW','cardH','fov','cardRotX','cardRotY','cardRotZ','selectorAngle','scrollStartFov','scrollEndFov'];
-  const floats = ['radius','padding','cardCorner','animSpeed','camY','camZ','orthoZoom','selectorTolerance','selectorLineWidth','selectorLineOpacity','selectorStart','selectorEnd','scrollCamStart','scrollCamEnd','scrollStartCamY','scrollEndCamY','scrollStartCamZ','scrollEndCamZ','hoverCamXStrength','hoverCamYStrength'];
+      function upd(key,val){
+        const ints = ['multiplier','cardW','cardH','fov','cardRotX','cardRotY','cardRotZ','selectorAngle','scrollStartFov','scrollEndFov'];
+        const floats = ['radius','padding','cardCorner','animSpeed','camY','camZ','orthoZoom','selectorTolerance','selectorLineWidth','selectorLineOpacity','selectorStart','selectorEnd','scrollCamStart','scrollCamEnd','scrollStartCamY','scrollEndCamY','scrollStartCamZ','scrollEndCamZ','hoverCamXStrength','hoverCamYStrength'];
 
-  if(ints.includes(key)) CFG[key] = parseInt(val, 10);
-  else if(floats.includes(key)) CFG[key] = parseFloat(val);
-  else if(key === 'bgColor'){
-    CFG.bgColor = val;
-    root.style.setProperty('--bg', val);
-    if (scene) scene.background = new THREE.Color(val);
-    if (groundMesh) groundMesh.material.color.set(val);
-    return;
-  }
-  else if(key === 'showLabels'){
-    CFG.showLabels = val;
-    if(!val && !CFG.showSelectorLine) svgOv.innerHTML = '';
-    return;
-  }
-  else if(key === 'showPreview'){
-    CFG.showPreview = val;
-    if(!val) els.previewPanel.classList.remove('visible');
-    return;
-  }
-  else if(key === 'showSelectorLine'){
-    CFG.showSelectorLine = val;
-    if(!val && !CFG.showLabels) svgOv.innerHTML = '';
-    return;
-  }
-  else if(key === 'showInfoBadge'){
-    CFG.showInfoBadge = val;
-    if (els.infoBadge) els.infoBadge.style.display = val ? '' : 'none';
-    return;
-  }
-  else if(key === 'selectorLineColor'){
-    CFG.selectorLineColor = val;
-    return;
-  }
-  else if(key === 'scrollCamEnabled'){
-    CFG.scrollCamEnabled = val;
-    return;
-  }
+        if(ints.includes(key)) CFG[key] = parseInt(val, 10);
+        else if(floats.includes(key)) CFG[key] = parseFloat(val);
+        else if(key === 'bgColor'){
+          CFG.bgColor = val;
+          root.style.setProperty('--bg', val);
+          scene.background = new THREE.Color(val);
+          groundMesh.material.color.set(val);
+          return;
+        }
+        else if(key === 'showLabels'){ CFG.showLabels = val; if(!val && !CFG.showSelectorLine) svgOv.innerHTML = ''; return; }
+        else if(key === 'showPreview'){ CFG.showPreview = val; if(!val) els.previewPanel.classList.remove('visible'); return; }
+        else if(key === 'showSelectorLine'){ CFG.showSelectorLine = val; if(!val && !CFG.showLabels) svgOv.innerHTML = ''; return; }
+        else if(key === 'selectorLineColor'){ CFG.selectorLineColor = val; return; }
+        else if(key === 'scrollCamEnabled'){ CFG.scrollCamEnabled = val; return; }
 
-  const valEl = $(`[data-val="${key}"]`);
-  if(valEl) valEl.textContent = val;
+        const valEl = $(`[data-val="${key}"]`);
+        if(valEl) valEl.textContent = val;
 
-  if(['camY','camZ','fov','orthoZoom','scrollCamStart','scrollCamEnd','scrollStartCamY','scrollEndCamY','scrollStartCamZ','scrollEndCamZ','scrollStartFov','scrollEndFov','hoverCamXStrength','hoverCamYStrength'].includes(key)) {
-    updCam();
-  }
-
-  if(['cardW','cardH','radius','padding','cardCorner','multiplier'].includes(key)) {
-    buildWheel();
-  }
-}
-
-
-/* 2) ADD this helper anywhere above bindControls() */
-function syncUIFromCFG() {
-  const setVal = (key, value) => {
-    const valEl = $(`[data-val="${key}"]`);
-    if (valEl) {
-      valEl.textContent = typeof value === 'number' ? String(value) : value;
-    }
-    const input = $(`[data-key="${key}"]`);
-    if (input) {
-      if (input.type === 'checkbox') input.checked = !!value;
-      else input.value = value;
-    }
-  };
-
-  setVal('camY', CFG.camY);
-  setVal('camZ', CFG.camZ);
-  setVal('fov', CFG.fov);
-  setVal('orthoZoom', CFG.orthoZoom);
-
-  setVal('scrollCamStart', CFG.scrollCamStart);
-  setVal('scrollCamEnd', CFG.scrollCamEnd);
-  setVal('scrollStartCamY', CFG.scrollStartCamY);
-  setVal('scrollEndCamY', CFG.scrollEndCamY);
-  setVal('scrollStartCamZ', CFG.scrollStartCamZ);
-  setVal('scrollEndCamZ', CFG.scrollEndCamZ);
-  setVal('scrollStartFov', CFG.scrollStartFov);
-  setVal('scrollEndFov', CFG.scrollEndFov);
-  setVal('scrollCamEnabled', CFG.scrollCamEnabled);
-
-  setVal('hoverCamXStrength', CFG.hoverCamXStrength);
-  setVal('hoverCamYStrength', CFG.hoverCamYStrength);
-
-  setVal('cardW', CFG.cardW);
-  setVal('cardH', CFG.cardH);
-  setVal('padding', CFG.padding);
-  setVal('cardCorner', CFG.cardCorner);
-  setVal('cardRotX', CFG.cardRotX);
-  setVal('cardRotY', CFG.cardRotY);
-  setVal('cardRotZ', CFG.cardRotZ);
-
-  setVal('radius', CFG.radius);
-  setVal('multiplier', CFG.multiplier);
-  setVal('animSpeed', CFG.animSpeed);
-
-  setVal('selectorAngle', CFG.selectorAngle);
-  setVal('selectorTolerance', CFG.selectorTolerance);
-  setVal('selectorLineWidth', CFG.selectorLineWidth);
-  setVal('selectorLineOpacity', CFG.selectorLineOpacity);
-  setVal('selectorStart', CFG.selectorStart);
-  setVal('selectorEnd', CFG.selectorEnd);
-  setVal('showSelectorLine', CFG.showSelectorLine);
-
-  setVal('showLabels', CFG.showLabels);
-  setVal('showPreview', CFG.showPreview);
-  setVal('showInfoBadge', CFG.showInfoBadge);
-
-  const bgInput = $('[data-key="bgColor"]');
-  if (bgInput) bgInput.value = CFG.bgColor;
-
-  const lineColorInput = $('[data-key="selectorLineColor"]');
-  if (lineColorInput) lineColorInput.value = CFG.selectorLineColor;
-
-  if (els.animSwitch) els.animSwitch.checked = CFG.animating;
-  if (els.infoBadge) els.infoBadge.style.display = CFG.showInfoBadge ? '' : 'none';
-
-  $$('[data-action="cam-type"]').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.value === CFG.camType);
-  });
-
-  $$('[data-action="fit-mode"]').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.value === CFG.globalFit);
-  });
-
-  $$('[data-action="blend-mode"]').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.value === CFG.selectorLineBlend);
-  });
-
-  if (els.fovGroup) els.fovGroup.style.display = CFG.camType === 'perspective' ? '' : 'none';
-  if (els.ozoomGroup) els.ozoomGroup.style.display = CFG.camType === 'orthographic' ? '' : 'none';
-}
-
-/* 3) ADD this helper anywhere above bindControls() */
-function getCurrentSettingsObject() {
-  return {
-    camera: {
-      projection: CFG.camType,
-      height: CFG.camY,
-      distance: CFG.camZ,
-      fov: CFG.fov,
-      orthoZoom: CFG.orthoZoom
-    },
-    scrollCamera: {
-      enabled: CFG.scrollCamEnabled,
-      start: CFG.scrollCamStart,
-      end: CFG.scrollCamEnd,
-      startCamY: CFG.scrollStartCamY,
-      endCamY: CFG.scrollEndCamY,
-      startCamZ: CFG.scrollStartCamZ,
-      endCamZ: CFG.scrollEndCamZ,
-      startFov: CFG.scrollStartFov,
-      endFov: CFG.scrollEndFov
-    },
-    hoverCamera: {
-      xStrength: CFG.hoverCamXStrength,
-      yStrength: CFG.hoverCamYStrength
-    },
-    card: {
-      width: CFG.cardW,
-      height: CFG.cardH,
-      padding: CFG.padding,
-      cornerRadius: CFG.cardCorner,
-      rotation: {
-        x: CFG.cardRotX,
-        y: CFG.cardRotY,
-        z: CFG.cardRotZ
+        if(['camY','camZ','fov','orthoZoom','scrollCamStart','scrollCamEnd','scrollStartCamY','scrollEndCamY','scrollStartCamZ','scrollEndCamZ','scrollStartFov','scrollEndFov','hoverCamXStrength','hoverCamYStrength'].includes(key)) {
+          updCam();
+        }
+        if(['cardW','cardH','radius','padding','cardCorner','multiplier'].includes(key)) {
+          buildWheel();
+        }
       }
-    },
-    wheel: {
-      radius: CFG.radius,
-      itemMultiplier: CFG.multiplier,
-      animSpeed: CFG.animSpeed,
-      animating: CFG.animating
-    },
-    appearance: {
-      bgColor: CFG.bgColor,
-      showLabels: CFG.showLabels,
-      showPreview: CFG.showPreview,
-      showInfoBadge: CFG.showInfoBadge
-    },
-    media: {
-      globalFit: CFG.globalFit
-    },
-    selector: {
-      angle: CFG.selectorAngle,
-      tolerance: CFG.selectorTolerance,
-      showLine: CFG.showSelectorLine,
-      lineColor: CFG.selectorLineColor,
-      lineWidth: CFG.selectorLineWidth,
-      lineOpacity: CFG.selectorLineOpacity,
-      lineBlend: CFG.selectorLineBlend,
-      start: CFG.selectorStart,
-      end: CFG.selectorEnd
-    }
-  };
-}
-
-function getCurrentSettingsJSON() {
-  return JSON.stringify(getCurrentSettingsObject(), null, 2);
-}
-
-/* 4) ADD this helper anywhere above bindControls() */
-function applySettingsObject(settings) {
-  if (!settings) return;
-
-  if (settings.camera) {
-    if (settings.camera.projection != null) CFG.camType = settings.camera.projection;
-    if (settings.camera.height != null) CFG.camY = settings.camera.height;
-    if (settings.camera.distance != null) CFG.camZ = settings.camera.distance;
-    if (settings.camera.fov != null) CFG.fov = settings.camera.fov;
-    if (settings.camera.orthoZoom != null) CFG.orthoZoom = settings.camera.orthoZoom;
-  }
-
-  if (settings.scrollCamera) {
-    if (settings.scrollCamera.enabled != null) CFG.scrollCamEnabled = settings.scrollCamera.enabled;
-    if (settings.scrollCamera.start != null) CFG.scrollCamStart = settings.scrollCamera.start;
-    if (settings.scrollCamera.end != null) CFG.scrollCamEnd = settings.scrollCamera.end;
-    if (settings.scrollCamera.startCamY != null) CFG.scrollStartCamY = settings.scrollCamera.startCamY;
-    if (settings.scrollCamera.endCamY != null) CFG.scrollEndCamY = settings.scrollCamera.endCamY;
-    if (settings.scrollCamera.startCamZ != null) CFG.scrollStartCamZ = settings.scrollCamera.startCamZ;
-    if (settings.scrollCamera.endCamZ != null) CFG.scrollEndCamZ = settings.scrollCamera.endCamZ;
-    if (settings.scrollCamera.startFov != null) CFG.scrollStartFov = settings.scrollCamera.startFov;
-    if (settings.scrollCamera.endFov != null) CFG.scrollEndFov = settings.scrollCamera.endFov;
-  }
-
-  if (settings.hoverCamera) {
-    if (settings.hoverCamera.xStrength != null) CFG.hoverCamXStrength = settings.hoverCamera.xStrength;
-    if (settings.hoverCamera.yStrength != null) CFG.hoverCamYStrength = settings.hoverCamera.yStrength;
-  }
-
-  if (settings.card) {
-    if (settings.card.width != null) CFG.cardW = settings.card.width;
-    if (settings.card.height != null) CFG.cardH = settings.card.height;
-    if (settings.card.padding != null) CFG.padding = settings.card.padding;
-    if (settings.card.cornerRadius != null) CFG.cardCorner = settings.card.cornerRadius;
-    if (settings.card.rotation) {
-      if (settings.card.rotation.x != null) CFG.cardRotX = settings.card.rotation.x;
-      if (settings.card.rotation.y != null) CFG.cardRotY = settings.card.rotation.y;
-      if (settings.card.rotation.z != null) CFG.cardRotZ = settings.card.rotation.z;
-    }
-  }
-
-  if (settings.wheel) {
-    if (settings.wheel.radius != null) CFG.radius = settings.wheel.radius;
-    if (settings.wheel.itemMultiplier != null) CFG.multiplier = settings.wheel.itemMultiplier;
-    if (settings.wheel.animSpeed != null) CFG.animSpeed = settings.wheel.animSpeed;
-    if (settings.wheel.animating != null) CFG.animating = settings.wheel.animating;
-  }
-
-  if (settings.appearance) {
-    if (settings.appearance.bgColor != null) CFG.bgColor = settings.appearance.bgColor;
-    if (settings.appearance.showLabels != null) CFG.showLabels = settings.appearance.showLabels;
-    if (settings.appearance.showPreview != null) CFG.showPreview = settings.appearance.showPreview;
-    if (settings.appearance.showInfoBadge != null) CFG.showInfoBadge = settings.appearance.showInfoBadge;
-  }
-
-  if (settings.media) {
-    if (settings.media.globalFit != null) CFG.globalFit = settings.media.globalFit;
-  }
-
-  if (settings.selector) {
-    if (settings.selector.angle != null) CFG.selectorAngle = settings.selector.angle;
-    if (settings.selector.tolerance != null) CFG.selectorTolerance = settings.selector.tolerance;
-    if (settings.selector.showLine != null) CFG.showSelectorLine = settings.selector.showLine;
-    if (settings.selector.lineColor != null) CFG.selectorLineColor = settings.selector.lineColor;
-    if (settings.selector.lineWidth != null) CFG.selectorLineWidth = settings.selector.lineWidth;
-    if (settings.selector.lineOpacity != null) CFG.selectorLineOpacity = settings.selector.lineOpacity;
-    if (settings.selector.lineBlend != null) CFG.selectorLineBlend = settings.selector.lineBlend;
-    if (settings.selector.start != null) CFG.selectorStart = settings.selector.start;
-    if (settings.selector.end != null) CFG.selectorEnd = settings.selector.end;
-  }
-
-  root.style.setProperty('--bg', CFG.bgColor);
-  if (scene) scene.background = new THREE.Color(CFG.bgColor);
-  if (groundMesh) groundMesh.material.color.set(CFG.bgColor);
-
-  syncUIFromCFG();
-  if (typeof toggleAnim === 'function') toggleAnim(CFG.animating);
-  if (typeof setSelectorBlend === 'function') setSelectorBlend(CFG.selectorLineBlend);
-  if (typeof setGlobalFit === 'function') setGlobalFit(CFG.globalFit);
-  if (typeof updCam === 'function') updCam();
-  if (typeof buildWheel === 'function') buildWheel();
-}
 
       function bindControls(){
         els.settingsBtn.addEventListener('click', toggleSettings);
@@ -1111,24 +850,6 @@ function applySettingsObject(settings) {
         $$('[data-action="upd"]').forEach(input => input.addEventListener('input', () => upd(input.dataset.key, input.value)));
         $$('[data-action="upd-color"]').forEach(input => input.addEventListener('input', () => upd(input.dataset.key, input.value)));
         $$('[data-action="upd-check"]').forEach(input => input.addEventListener('change', () => upd(input.dataset.key, input.checked)));
-
-        /* added */
-        const copyBtn = $('[data-action="copy-settings-json"]');
-        if (copyBtn) {
-          copyBtn.addEventListener('click', async () => {
-            const json = getCurrentSettingsJSON();
-            try {
-              await navigator.clipboard.writeText(json);
-              const oldText = copyBtn.textContent;
-              copyBtn.textContent = 'Copied';
-              setTimeout(() => { copyBtn.textContent = oldText; }, 1200);
-            } catch (err) {
-              console.log(json);
-              alert('Clipboard copy failed. Settings JSON was printed to the console.');
-            }
-          });
-        }
-
       }
 
       function onResize(){
@@ -1168,13 +889,7 @@ function applySettingsObject(settings) {
 
         buildWheel();
         setSelectorBlend(CFG.selectorLineBlend);
-
-        /* above bindControls() */  
         bindControls();
-
-syncUIFromCFG();
-if (els.infoBadge) els.infoBadge.style.display = CFG.showInfoBadge ? '' : 'none';
-if (els.animSwitch) els.animSwitch.checked = CFG.animating;
 
         window.addEventListener('resize', onResize);
 

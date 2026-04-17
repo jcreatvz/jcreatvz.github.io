@@ -1,14 +1,6 @@
     (function(){
-      const scriptEl = document.currentScript;
-      const scriptScope =
-        (scriptEl && scriptEl.closest('.mw-scroll-section')) ||
-        (scriptEl && scriptEl.parentElement) ||
-        document;
-      const root = scriptScope ? scriptScope.querySelector('.wf-media-wheel') : null;
-      if (!root) {
-        console.error('Media wheel root not found');
-        return;
-      }
+      function initMediaWheel(root){
+      if (!root) return;
       if (root.dataset.init === 'true') return;
       root.dataset.init = 'true';
 
@@ -1133,4 +1125,15 @@
       }
 
       init();
+      }
+
+      function initAllMediaWheels(){
+        document.querySelectorAll('.wf-media-wheel').forEach(initMediaWheel);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAllMediaWheels, { once: true });
+      } else {
+        initAllMediaWheels();
+      }
     })();

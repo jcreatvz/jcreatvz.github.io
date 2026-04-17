@@ -42,7 +42,7 @@
         endCamY: 2.0,
         startCamZ: 12.8,
         endCamZ: 6.5,
-        startFov: 31,
+        startFov: 89,
         endFov: 10
       },
       card: {

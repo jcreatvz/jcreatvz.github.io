@@ -21,6 +21,8 @@
         settingsPanel: $('[data-el="settings-panel"]'),
         infoBadge: $('[data-el="info-badge"]'),
         animSwitch: $('[data-action="toggle-anim"]'),
+        copySettingsBtn: $('[data-action="copy-settings-json"]'),
+        exportOutput: $('[data-el="export-output"]'),
         fovGroup: $('[data-el="fov-group"]'),
         ozoomGroup: $('[data-el="ozoom-group"]')
       };
@@ -110,7 +112,6 @@
       let rotAngle = 0, hoveredIdx = -1, autoVelocity = CFG.animSpeed * 0.006, scrollVelocity = 0;
       let touchDragging = false, lastTouchY = 0, lastTouchX = 0, touchVelocity = 0;
       let hoverCamOffsetX = 0, hoverCamOffsetY = 0, targetHoverCamOffsetX = 0, targetHoverCamOffsetY = 0;
-      let exportControlsMounted = false;
       const svgOv = els.labelOverlay;
 
       function getSize(){
@@ -812,83 +813,32 @@
       }
 
       function refreshExportOutput(){
-        const output = $('[data-el="export-output"]', els.settingsPanel);
+        const output = els.exportOutput;
         if (!output) return;
         output.value = JSON.stringify(getExportConfig(), null, 2);
       }
 
-      function mountExportControls(){
-        if (exportControlsMounted || !els.settingsPanel) return;
-        exportControlsMounted = true;
+      async function copySettingsJson(){
+        refreshExportOutput();
+        const output = els.exportOutput;
+        const text = output ? output.value : JSON.stringify(getExportConfig(), null, 2);
 
-        const section = document.createElement('div');
-        section.setAttribute('data-el', 'export-tools');
-        section.style.cssText = 'margin-top:24px;padding-top:20px;border-top:1px solid rgba(0,0,0,0.08);display:grid;gap:12px;';
+        if (!els.copySettingsBtn) return;
 
-        const title = document.createElement('div');
-        title.textContent = 'EXPORT JSON';
-        title.style.cssText = 'font-size:14px;font-weight:700;letter-spacing:0.14em;color:#e63946;';
-
-        const badgeWrap = document.createElement('label');
-        badgeWrap.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:14px;color:#333;';
-        const badgeToggle = document.createElement('input');
-        badgeToggle.type = 'checkbox';
-        badgeToggle.checked = !!CFG.showInfoBadge;
-        badgeToggle.setAttribute('data-action', 'toggle-info-badge');
-        badgeWrap.appendChild(badgeToggle);
-        badgeWrap.appendChild(document.createTextNode('Show Info Badge'));
-
-        const actions = document.createElement('div');
-        actions.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;';
-
-        const copyBtn = document.createElement('button');
-        copyBtn.type = 'button';
-        copyBtn.textContent = 'Copy JSON';
-        copyBtn.setAttribute('data-action', 'copy-export-json');
-        copyBtn.style.cssText = 'border:0;border-radius:999px;padding:10px 16px;background:#111;color:#fff;font:600 14px/1 inherit;cursor:pointer;';
-
-        const refreshBtn = document.createElement('button');
-        refreshBtn.type = 'button';
-        refreshBtn.textContent = 'Refresh JSON';
-        refreshBtn.setAttribute('data-action', 'refresh-export-json');
-        refreshBtn.style.cssText = 'border:1px solid rgba(0,0,0,0.14);border-radius:999px;padding:10px 16px;background:transparent;color:#111;font:600 14px/1 inherit;cursor:pointer;';
-
-        const output = document.createElement('textarea');
-        output.setAttribute('data-el', 'export-output');
-        output.readOnly = true;
-        output.spellcheck = false;
-        output.style.cssText = 'width:100%;min-height:220px;border:1px solid rgba(0,0,0,0.12);border-radius:16px;padding:14px;background:rgba(255,255,255,0.72);font:12px/1.5 "Space Mono",monospace;color:#111;resize:vertical;';
-
-        actions.appendChild(copyBtn);
-        actions.appendChild(refreshBtn);
-        section.appendChild(title);
-        section.appendChild(badgeWrap);
-        section.appendChild(actions);
-        section.appendChild(output);
-        els.settingsPanel.appendChild(section);
-
-        badgeToggle.addEventListener('change', (e) => {
-          setInfoBadgeVisibility(e.target.checked);
-          refreshExportOutput();
-        });
-
-        refreshBtn.addEventListener('click', refreshExportOutput);
-        copyBtn.addEventListener('click', async () => {
-          refreshExportOutput();
-          try {
-            await navigator.clipboard.writeText(output.value);
-            copyBtn.textContent = 'Copied';
-          } catch (err) {
+        try {
+          await navigator.clipboard.writeText(text);
+          els.copySettingsBtn.textContent = 'Copied JSON';
+        } catch (err) {
+          if (output) {
             output.focus();
             output.select();
-            copyBtn.textContent = 'Select JSON';
+            els.copySettingsBtn.textContent = 'Select JSON';
           }
-          window.setTimeout(() => {
-            copyBtn.textContent = 'Copy JSON';
-          }, 1600);
-        });
+        }
 
-        refreshExportOutput();
+        window.setTimeout(() => {
+          if (els.copySettingsBtn) els.copySettingsBtn.textContent = 'Copy Settings JSON';
+        }, 1600);
       }
 
       function syncControlsFromConfig(){
@@ -990,7 +940,9 @@
         $$('[data-action="upd"]').forEach(input => input.addEventListener('input', () => upd(input.dataset.key, input.value)));
         $$('[data-action="upd-color"]').forEach(input => input.addEventListener('input', () => upd(input.dataset.key, input.value)));
         $$('[data-action="upd-check"]').forEach(input => input.addEventListener('change', () => upd(input.dataset.key, input.checked)));
-        mountExportControls();
+        if (els.copySettingsBtn) {
+          els.copySettingsBtn.addEventListener('click', copySettingsJson);
+        }
       }
 
       function onResize(){

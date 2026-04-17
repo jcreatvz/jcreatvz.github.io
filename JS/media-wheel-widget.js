@@ -36,7 +36,7 @@
       },
       scrollCamera: {
         enabled: true,
-        start: 0.10,
+        start: 0.48,
         end: 0.90,
         startCamY: 6.8,
         endCamY: 2.0,

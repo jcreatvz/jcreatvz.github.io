@@ -1,4 +1,6 @@
     (function(){
+      const THREE_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+
       function initMediaWheel(root){
       if (!root) return;
       if (root.dataset.init === 'true') return;
@@ -1128,12 +1130,57 @@
       }
 
       function initAllMediaWheels(){
+        if (!window.THREE) return false;
         document.querySelectorAll('.wf-media-wheel').forEach(initMediaWheel);
+        return document.querySelectorAll('.wf-media-wheel').length > 0;
+      }
+
+      function ensureThree(callback){
+        if (window.THREE) {
+          callback();
+          return;
+        }
+
+        let existing = document.querySelector('script[data-media-wheel-three="true"]');
+        if (!existing) {
+          existing = document.createElement('script');
+          existing.src = THREE_SRC;
+          existing.async = false;
+          existing.setAttribute('data-media-wheel-three', 'true');
+          existing.addEventListener('load', callback, { once: true });
+          document.head.appendChild(existing);
+          return;
+        }
+
+        existing.addEventListener('load', callback, { once: true });
+      }
+
+      function startBootstrap(){
+        let attempts = 0;
+        const maxAttempts = 40;
+
+        const tryInit = () => {
+          attempts += 1;
+          const found = initAllMediaWheels();
+          if (found || attempts >= maxAttempts) return;
+          window.setTimeout(tryInit, 250);
+        };
+
+        tryInit();
+      }
+
+      const observer = new MutationObserver(() => {
+        initAllMediaWheels();
+      });
+
+      function boot(){
+        startBootstrap();
+        observer.observe(document.documentElement, { childList: true, subtree: true });
       }
 
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initAllMediaWheels, { once: true });
+        document.addEventListener('DOMContentLoaded', () => ensureThree(boot), { once: true });
       } else {
-        initAllMediaWheels();
+        ensureThree(boot);
       }
     })();

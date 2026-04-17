@@ -36,13 +36,13 @@
       },
       scrollCamera: {
         enabled: true,
-        start: 0.48,
-        end: 0.90,
+        start: 0.0,
+        end: 1.21,
         startCamY: 6.8,
         endCamY: 2.0,
         startCamZ: 12.8,
-        endCamZ: 6.5,
-        startFov: 89,
+        endCamZ: 6.8,
+        startFov: 31,
         endFov: 120
       },
       card: {

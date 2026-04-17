@@ -1,0 +1,12 @@
+﻿/* Apply these classes to real Webflow elements, not inside an embed block. */
+.mw-scroll-section {
+  position: relative;
+  height: 300vh;
+}
+
+.mw-sticky-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}

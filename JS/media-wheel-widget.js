@@ -34,13 +34,13 @@
 
         scrollCamEnabled: true,
         scrollCamStart: 0.08,
-        scrollCamEnd: 0.72,
+        scrollCamEnd: 1,
         scrollStartCamY: 6.8,
-        scrollEndCamY: 2.0,
+        scrollEndCamY: 20,
         scrollStartCamZ: 12.8,
-        scrollEndCamZ: 6.5,
-        scrollStartFov: 31,
-        scrollEndFov: 58,
+        scrollEndCamZ: 17.1,
+        scrollStartFov: 32,
+        scrollEndFov: 23,
 
         hoverCamXStrength: 1.2,
         hoverCamYStrength: 0.7,
@@ -49,11 +49,11 @@
         cardH: 149,
         padding: 0,
         cardCorner: 0.5,
-        cardRotX: 4,
-        cardRotY: -90,
+        cardRotX: 2,
+        cardRotY: -72,
         cardRotZ: 0,
 
-        radius: 2.1,
+        radius: 2.9,
         multiplier: 2,
         animSpeed: 1.11,
         animating: true,
@@ -61,6 +61,7 @@
         bgColor: '#ff0000',
         showLabels: true,
         showPreview: true,
+        showInfoBadge: true,
         globalFit: 'cover',
 
         selectorAngle: 325,
@@ -109,6 +110,7 @@
       let rotAngle = 0, hoveredIdx = -1, autoVelocity = CFG.animSpeed * 0.006, scrollVelocity = 0;
       let touchDragging = false, lastTouchY = 0, lastTouchX = 0, touchVelocity = 0;
       let hoverCamOffsetX = 0, hoverCamOffsetY = 0, targetHoverCamOffsetX = 0, targetHoverCamOffsetY = 0;
+      let exportControlsMounted = false;
       const svgOv = els.labelOverlay;
 
       function getSize(){
@@ -169,6 +171,7 @@
         $$('[data-action="blend-mode"]').forEach(btn => {
           btn.classList.toggle('active', btn.dataset.value === mode);
         });
+        refreshExportOutput();
       }
 
       function projectWorldToScreen(vec3){
@@ -785,12 +788,140 @@
 
       function toggleAnim(on){
         CFG.animating = on;
+        if (els.animSwitch) els.animSwitch.checked = on;
         els.infoBadge.textContent = on
           ? 'Sticky section · Scroll drives camera · Hover drifts camera'
           : 'Paused · Scroll still drives camera';
       }
 
       function toggleSettings(){ els.settingsPanel.classList.toggle('open'); }
+
+      function setInfoBadgeVisibility(show){
+        CFG.showInfoBadge = show;
+        if (!els.infoBadge) return;
+        els.infoBadge.hidden = !show;
+        els.infoBadge.style.display = show ? '' : 'none';
+      }
+
+      function getExportConfig(){
+        return {
+          ...CFG,
+          animating: !!CFG.animating,
+          showInfoBadge: !!CFG.showInfoBadge
+        };
+      }
+
+      function refreshExportOutput(){
+        const output = $('[data-el="export-output"]', els.settingsPanel);
+        if (!output) return;
+        output.value = JSON.stringify(getExportConfig(), null, 2);
+      }
+
+      function mountExportControls(){
+        if (exportControlsMounted || !els.settingsPanel) return;
+        exportControlsMounted = true;
+
+        const section = document.createElement('div');
+        section.setAttribute('data-el', 'export-tools');
+        section.style.cssText = 'margin-top:24px;padding-top:20px;border-top:1px solid rgba(0,0,0,0.08);display:grid;gap:12px;';
+
+        const title = document.createElement('div');
+        title.textContent = 'EXPORT JSON';
+        title.style.cssText = 'font-size:14px;font-weight:700;letter-spacing:0.14em;color:#e63946;';
+
+        const badgeWrap = document.createElement('label');
+        badgeWrap.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:14px;color:#333;';
+        const badgeToggle = document.createElement('input');
+        badgeToggle.type = 'checkbox';
+        badgeToggle.checked = !!CFG.showInfoBadge;
+        badgeToggle.setAttribute('data-action', 'toggle-info-badge');
+        badgeWrap.appendChild(badgeToggle);
+        badgeWrap.appendChild(document.createTextNode('Show Info Badge'));
+
+        const actions = document.createElement('div');
+        actions.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;';
+
+        const copyBtn = document.createElement('button');
+        copyBtn.type = 'button';
+        copyBtn.textContent = 'Copy JSON';
+        copyBtn.setAttribute('data-action', 'copy-export-json');
+        copyBtn.style.cssText = 'border:0;border-radius:999px;padding:10px 16px;background:#111;color:#fff;font:600 14px/1 inherit;cursor:pointer;';
+
+        const refreshBtn = document.createElement('button');
+        refreshBtn.type = 'button';
+        refreshBtn.textContent = 'Refresh JSON';
+        refreshBtn.setAttribute('data-action', 'refresh-export-json');
+        refreshBtn.style.cssText = 'border:1px solid rgba(0,0,0,0.14);border-radius:999px;padding:10px 16px;background:transparent;color:#111;font:600 14px/1 inherit;cursor:pointer;';
+
+        const output = document.createElement('textarea');
+        output.setAttribute('data-el', 'export-output');
+        output.readOnly = true;
+        output.spellcheck = false;
+        output.style.cssText = 'width:100%;min-height:220px;border:1px solid rgba(0,0,0,0.12);border-radius:16px;padding:14px;background:rgba(255,255,255,0.72);font:12px/1.5 "Space Mono",monospace;color:#111;resize:vertical;';
+
+        actions.appendChild(copyBtn);
+        actions.appendChild(refreshBtn);
+        section.appendChild(title);
+        section.appendChild(badgeWrap);
+        section.appendChild(actions);
+        section.appendChild(output);
+        els.settingsPanel.appendChild(section);
+
+        badgeToggle.addEventListener('change', (e) => {
+          setInfoBadgeVisibility(e.target.checked);
+          refreshExportOutput();
+        });
+
+        refreshBtn.addEventListener('click', refreshExportOutput);
+        copyBtn.addEventListener('click', async () => {
+          refreshExportOutput();
+          try {
+            await navigator.clipboard.writeText(output.value);
+            copyBtn.textContent = 'Copied';
+          } catch (err) {
+            output.focus();
+            output.select();
+            copyBtn.textContent = 'Select JSON';
+          }
+          window.setTimeout(() => {
+            copyBtn.textContent = 'Copy JSON';
+          }, 1600);
+        });
+
+        refreshExportOutput();
+      }
+
+      function syncControlsFromConfig(){
+        $$('[data-action="upd"]').forEach(input => {
+          const key = input.dataset.key;
+          if (!key || !(key in CFG)) return;
+          input.value = CFG[key];
+        });
+
+        $$('[data-action="upd-color"]').forEach(input => {
+          const key = input.dataset.key;
+          if (!key || !(key in CFG)) return;
+          input.value = CFG[key];
+        });
+
+        $$('[data-action="upd-check"]').forEach(input => {
+          const key = input.dataset.key;
+          if (!key || !(key in CFG)) return;
+          input.checked = !!CFG[key];
+        });
+
+        Object.keys(CFG).forEach(key => {
+          const valEl = $(`[data-val="${key}"]`);
+          if (valEl) valEl.textContent = CFG[key];
+        });
+
+        setCamType(CFG.camType);
+        setGlobalFit(CFG.globalFit);
+        setSelectorBlend(CFG.selectorLineBlend);
+        toggleAnim(CFG.animating);
+        setInfoBadgeVisibility(CFG.showInfoBadge);
+        refreshExportOutput();
+      }
 
       function setCamType(type){
         CFG.camType = type;
@@ -800,6 +931,7 @@
         els.fovGroup.style.display = type==='perspective' ? '' : 'none';
         els.ozoomGroup.style.display = type==='orthographic' ? '' : 'none';
         updCam();
+        refreshExportOutput();
       }
 
       function setGlobalFit(mode){
@@ -809,6 +941,7 @@
         });
         redrawAllMediaTextures();
         if (hoveredIdx >= 0) updPreview(hoveredIdx);
+        refreshExportOutput();
       }
 
       function upd(key,val){
@@ -822,13 +955,15 @@
           root.style.setProperty('--bg', val);
           scene.background = new THREE.Color(val);
           groundMesh.material.color.set(val);
+          refreshExportOutput();
           return;
         }
-        else if(key === 'showLabels'){ CFG.showLabels = val; if(!val && !CFG.showSelectorLine) svgOv.innerHTML = ''; return; }
-        else if(key === 'showPreview'){ CFG.showPreview = val; if(!val) els.previewPanel.classList.remove('visible'); return; }
-        else if(key === 'showSelectorLine'){ CFG.showSelectorLine = val; if(!val && !CFG.showLabels) svgOv.innerHTML = ''; return; }
-        else if(key === 'selectorLineColor'){ CFG.selectorLineColor = val; return; }
-        else if(key === 'scrollCamEnabled'){ CFG.scrollCamEnabled = val; return; }
+        else if(key === 'showLabels'){ CFG.showLabels = val; if(!val && !CFG.showSelectorLine) svgOv.innerHTML = ''; refreshExportOutput(); return; }
+        else if(key === 'showPreview'){ CFG.showPreview = val; if(!val) els.previewPanel.classList.remove('visible'); refreshExportOutput(); return; }
+        else if(key === 'showInfoBadge'){ setInfoBadgeVisibility(val); refreshExportOutput(); return; }
+        else if(key === 'showSelectorLine'){ CFG.showSelectorLine = val; if(!val && !CFG.showLabels) svgOv.innerHTML = ''; refreshExportOutput(); return; }
+        else if(key === 'selectorLineColor'){ CFG.selectorLineColor = val; refreshExportOutput(); return; }
+        else if(key === 'scrollCamEnabled'){ CFG.scrollCamEnabled = val; refreshExportOutput(); return; }
 
         const valEl = $(`[data-val="${key}"]`);
         if(valEl) valEl.textContent = val;
@@ -839,17 +974,23 @@
         if(['cardW','cardH','radius','padding','cardCorner','multiplier'].includes(key)) {
           buildWheel();
         }
+
+        refreshExportOutput();
       }
 
       function bindControls(){
         els.settingsBtn.addEventListener('click', toggleSettings);
-        els.animSwitch.addEventListener('change', (e) => toggleAnim(e.target.checked));
+        els.animSwitch.addEventListener('change', (e) => {
+          toggleAnim(e.target.checked);
+          refreshExportOutput();
+        });
         $$('[data-action="cam-type"]').forEach(btn => btn.addEventListener('click', () => setCamType(btn.dataset.value)));
         $$('[data-action="fit-mode"]').forEach(btn => btn.addEventListener('click', () => setGlobalFit(btn.dataset.value)));
         $$('[data-action="blend-mode"]').forEach(btn => btn.addEventListener('click', () => setSelectorBlend(btn.dataset.value)));
         $$('[data-action="upd"]').forEach(input => input.addEventListener('input', () => upd(input.dataset.key, input.value)));
         $$('[data-action="upd-color"]').forEach(input => input.addEventListener('input', () => upd(input.dataset.key, input.value)));
         $$('[data-action="upd-check"]').forEach(input => input.addEventListener('change', () => upd(input.dataset.key, input.checked)));
+        mountExportControls();
       }
 
       function onResize(){
@@ -888,8 +1029,8 @@
         mouse = new THREE.Vector2(-999,-999);
 
         buildWheel();
-        setSelectorBlend(CFG.selectorLineBlend);
         bindControls();
+        syncControlsFromConfig();
 
         window.addEventListener('resize', onResize);
 

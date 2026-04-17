@@ -23,6 +23,7 @@
         animSwitch: $('[data-action="toggle-anim"]'),
         copySettingsBtn: $('[data-action="copy-settings-json"]'),
         exportOutput: $('[data-el="export-output"]'),
+        showInfoBadgeCheck: $('[data-key="showInfoBadge"]'),
         fovGroup: $('[data-el="fov-group"]'),
         ozoomGroup: $('[data-el="ozoom-group"]')
       };
@@ -35,14 +36,14 @@
         orthoZoom: 1.0,
 
         scrollCamEnabled: true,
-        scrollCamStart: 0.08,
+        scrollCamStart: 0,
         scrollCamEnd: 1,
         scrollStartCamY: 6.8,
-        scrollEndCamY: 20,
+        scrollEndCamY: 2,
         scrollStartCamZ: 12.8,
-        scrollEndCamZ: 17.1,
-        scrollStartFov: 32,
-        scrollEndFov: 23,
+        scrollEndCamZ: 6.5,
+        scrollStartFov: 31,
+        scrollEndFov: 62,
 
         hoverCamXStrength: 1.2,
         hoverCamYStrength: 0.7,
@@ -51,9 +52,9 @@
         cardH: 149,
         padding: 0,
         cardCorner: 0.5,
-        cardRotX: 2,
-        cardRotY: -72,
-        cardRotZ: 0,
+        cardRotX: 67,
+        cardRotY: -117,
+        cardRotZ: 57,
 
         radius: 2.9,
         multiplier: 2,
@@ -797,11 +798,58 @@
 
       function toggleSettings(){ els.settingsPanel.classList.toggle('open'); }
 
+      function ensureExportControls(){
+        if (!els.settingsPanel) return;
+
+        if (!els.copySettingsBtn || !els.exportOutput) {
+          let exportSection = $('[data-el="export-tools"]', els.settingsPanel);
+
+          if (!exportSection) {
+            exportSection = document.createElement('div');
+            exportSection.setAttribute('data-el', 'export-tools');
+
+            const title = document.createElement('div');
+            title.className = 'section-title';
+            title.textContent = 'Export';
+
+            const buttonWrap = document.createElement('div');
+            buttonWrap.className = 'sg';
+
+            const copyBtn = document.createElement('button');
+            copyBtn.type = 'button';
+            copyBtn.className = 'cam-btn active';
+            copyBtn.setAttribute('data-action', 'copy-settings-json');
+            copyBtn.textContent = 'Copy Settings JSON';
+            buttonWrap.appendChild(copyBtn);
+
+            const outputWrap = document.createElement('div');
+            outputWrap.className = 'sg';
+
+            const output = document.createElement('textarea');
+            output.setAttribute('data-el', 'export-output');
+            output.readOnly = true;
+            output.spellcheck = false;
+            outputWrap.appendChild(output);
+
+            exportSection.appendChild(title);
+            exportSection.appendChild(buttonWrap);
+            exportSection.appendChild(outputWrap);
+            els.settingsPanel.appendChild(exportSection);
+          }
+
+          if (!els.copySettingsBtn) els.copySettingsBtn = $('[data-action="copy-settings-json"]', els.settingsPanel);
+          if (!els.exportOutput) els.exportOutput = $('[data-el="export-output"]', els.settingsPanel);
+        }
+      }
+
       function setInfoBadgeVisibility(show){
         CFG.showInfoBadge = show;
+        if (els.showInfoBadgeCheck) els.showInfoBadgeCheck.checked = show;
         if (!els.infoBadge) return;
         els.infoBadge.hidden = !show;
         els.infoBadge.style.display = show ? '' : 'none';
+        els.infoBadge.style.opacity = show ? '1' : '0';
+        els.infoBadge.style.pointerEvents = show ? '' : 'none';
       }
 
       function getExportConfig(){
@@ -813,6 +861,7 @@
       }
 
       function refreshExportOutput(){
+        ensureExportControls();
         const output = els.exportOutput;
         if (!output) return;
         output.value = JSON.stringify(getExportConfig(), null, 2);
@@ -929,6 +978,7 @@
       }
 
       function bindControls(){
+        ensureExportControls();
         els.settingsBtn.addEventListener('click', toggleSettings);
         els.animSwitch.addEventListener('change', (e) => {
           toggleAnim(e.target.checked);

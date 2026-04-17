@@ -1,6 +1,15 @@
     (function(){
-      const root = document.currentScript.previousElementSibling.querySelector('.wf-media-wheel');
-      if (!root || root.dataset.init === 'true') return;
+      const scriptEl = document.currentScript;
+      const scriptScope =
+        (scriptEl && scriptEl.closest('.mw-scroll-section')) ||
+        (scriptEl && scriptEl.parentElement) ||
+        document;
+      const root = scriptScope ? scriptScope.querySelector('.wf-media-wheel') : null;
+      if (!root) {
+        console.error('Media wheel root not found');
+        return;
+      }
+      if (root.dataset.init === 'true') return;
       root.dataset.init = 'true';
 
       if (!window.THREE) {

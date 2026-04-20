@@ -1,3 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Media Wheel – Standalone Test</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+/* Apply these classes to real Webflow elements, not inside an embed block. */
+.mw-scroll-section {
+  position: relative;
+  height: 300vh;
+}
+
+.mw-sticky-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+</style>
+</head>
+<body>
+
+<!-- This mirrors the expected Webflow structure from README -->
+<div class="mw-scroll-section">
+  <div class="mw-sticky-stage">
+<div class="wf-media-wheel" data-widget="media-wheel">
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap');
+.wf-media-wheel{
+          --bg:#ff0000;
+          --text:#1a1a1a;
+          --muted:#888;
+          --accent:#e63946;
+          position:relative;
+          width:100%;
+          height:100%;
+          min-height:100%;
+          overflow:hidden;
+          font-family:'DM Sans',sans-serif;
+          background:var(--bg);
+          color:var(--text);
+          user-select:none;
+          isolation:isolate;
+        }
+
+        .wf-media-wheel *{margin:0;padding:0;box-sizing:border-box}
+
+        .wf-media-wheel [data-el="canvas-container"]{
+          position:absolute;
+          inset:0;
+          width:100%;
+          height:100%;
+          touch-action:none;
+        }
+
+        .wf-media-wheel [data-el="canvas-container"] canvas{
+          display:block;
+          width:100%;
+          height:100%;
+          touch-action:none;
+        }
+
+        .wf-media-wheel [data-el="label-overlay"]{
+          position:absolute;
+          inset:0;
+          width:100%;
+          height:100%;
+          pointer-events:none;
+          z-index:5;
+        }
+
+        .wf-media-wheel [data-el="rotate-toggle"]{
+          position:absolute;
+          top:20px;
+          left:50%;
+          transform:translateX(-50%);
+          z-index:20;
+          display:flex;
+          align-items:center;
+          gap:10px;
+          background:rgba(255,255,255,.88);
+          backdrop-filter:blur(14px);
+          border-radius:28px;
+          padding:6px 18px;
+          box-shadow:0 2px 20px rgba(0,0,0,.07);
+          border:1px solid rgba(0,0,0,.05);
+        }
+
+        .wf-media-wheel [data-el="rotate-toggle"] span{
+          font-size:12px;
+          font-weight:500;
+          color:var(--muted);
+          white-space:nowrap;
+        }
+
+        .wf-media-wheel .switch{position:relative;width:40px;height:22px;cursor:pointer}
+        .wf-media-wheel .switch input{opacity:0;width:0;height:0}
+        .wf-media-wheel .slider{
+          position:absolute;
+          inset:0;
+          background:#ccc;
+          border-radius:22px;
+          transition:.3s;
+        }
+        .wf-media-wheel .slider::before{
+          content:'';
+          position:absolute;
+          height:16px;
+          width:16px;
+          left:3px;
+          bottom:3px;
+          background:#fff;
+          border-radius:50%;
+          transition:.3s;
+        }
+        .wf-media-wheel .switch input:checked + .slider{background:var(--accent)}
+        .wf-media-wheel .switch input:checked + .slider::before{transform:translateX(18px)}
+
+        .wf-media-wheel [data-el="preview-panel"]{
+          position:absolute;
+          top:20px;
+          left:20px;
+          z-index:15;
+          background:#fff;
+          border-radius:10px;
+          overflow:hidden;
+          box-shadow:0 8px 36px rgba(0,0,0,.12);
+          transition:opacity .3s,transform .3s;
+          opacity:0;
+          transform:translateY(6px);
+          pointer-events:none;
+          width:220px;
+        }
+
+        .wf-media-wheel [data-el="preview-panel"].visible{
+          opacity:1;
+          transform:translateY(0);
+          pointer-events:auto;
+        }
+
+        .wf-media-wheel [data-el="preview-image"]{
+          width:220px;
+          height:155px;
+          object-fit:cover;
+          display:block;
+          background:#f3f3f3;
+        }
+
+        .wf-media-wheel [data-el="preview-title"]{
+          padding:10px 14px;
+          font-size:13px;
+          font-weight:500;
+        }
+
+        .wf-media-wheel [data-el="settings-btn"]{
+          position:absolute;
+          top:20px;
+          right:20px;
+          z-index:25;
+          width:36px;
+          height:36px;
+          border-radius:50%;
+          background:rgba(255,255,255,.88);
+          backdrop-filter:blur(14px);
+          border:1px solid rgba(0,0,0,.05);
+          cursor:pointer;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          box-shadow:0 2px 12px rgba(0,0,0,.06);
+          transition:transform .3s;
+          appearance:none;
+          -webkit-appearance:none;
+        }
+
+        .wf-media-wheel [data-el="settings-btn"]:hover{transform:rotate(45deg)}
+        .wf-media-wheel [data-el="settings-btn"] svg{width:18px;height:18px;fill:#666}
+
+        .wf-media-wheel [data-el="settings-panel"]{
+          position:absolute;
+          top:64px;
+          right:20px;
+          z-index:25;
+          width:300px;
+          background:rgba(255,255,255,.96);
+          backdrop-filter:blur(18px);
+          border-radius:14px;
+          padding:18px;
+          box-shadow:0 12px 48px rgba(0,0,0,.12);
+          border:1px solid rgba(0,0,0,.05);
+          display:none;
+          max-height:80vh;
+          overflow-y:auto;
+        }
+
+        .wf-media-wheel [data-el="settings-panel"].open{display:block}
+        .wf-media-wheel .sg{margin-bottom:12px}
+        .wf-media-wheel .sg label{
+          display:block;
+          font-size:9.5px;
+          font-weight:600;
+          text-transform:uppercase;
+          letter-spacing:.08em;
+          color:var(--muted);
+          margin-bottom:4px;
+        }
+        .wf-media-wheel .sg input[type="range"]{width:100%;accent-color:var(--accent)}
+        .wf-media-wheel .sg .v{
+          font-family:'Space Mono',monospace;
+          font-size:9.5px;
+          color:var(--text);
+          float:right;
+        }
+        .wf-media-wheel .sg input[type="color"]{
+          width:26px;
+          height:26px;
+          border:none;
+          border-radius:6px;
+          cursor:pointer;
+          padding:0;
+          background:none;
+        }
+        .wf-media-wheel .sr{display:flex;align-items:center;justify-content:space-between}
+        .wf-media-wheel .tl{display:flex;gap:6px;align-items:center}
+        .wf-media-wheel .tl input[type="checkbox"]{accent-color:var(--accent)}
+        .wf-media-wheel .tl span{font-size:11px}
+
+        .wf-media-wheel .section-title{
+          font-size:10px;
+          font-weight:700;
+          text-transform:uppercase;
+          letter-spacing:.1em;
+          color:var(--accent);
+          margin:14px 0 8px;
+          padding-top:10px;
+          border-top:1px solid rgba(0,0,0,.06);
+        }
+        .wf-media-wheel .section-title:first-child{
+          margin-top:0;
+          padding-top:0;
+          border-top:none;
+        }
+
+        .wf-media-wheel .cam-toggle,
+        .wf-media-wheel .fit-toggle,
+        .wf-media-wheel .blend-toggle{
+          display:flex;
+          gap:4px;
+          margin-top:4px;
+          flex-wrap:wrap;
+        }
+
+        .wf-media-wheel .cam-btn,
+        .wf-media-wheel .fit-btn,
+        .wf-media-wheel .blend-btn{
+          padding:5px 14px;
+          border:1px solid rgba(0,0,0,.1);
+          background:transparent;
+          font-family:'DM Sans',sans-serif;
+          font-size:11px;
+          font-weight:500;
+          color:#999;
+          cursor:pointer;
+          border-radius:16px;
+          transition:all .25s;
+          appearance:none;
+          -webkit-appearance:none;
+        }
+
+        .wf-media-wheel .cam-btn.active,
+        .wf-media-wheel .fit-btn.active,
+        .wf-media-wheel .blend-btn.active{
+          background:var(--text);
+          color:#fff;
+          border-color:var(--text);
+        }
+
+        .wf-media-wheel [data-el="export-output"]{
+          width:100%;
+          min-height:180px;
+          border:1px solid rgba(0,0,0,.12);
+          border-radius:12px;
+          padding:12px;
+          background:rgba(255,255,255,.72);
+          font:12px/1.5 'Space Mono',monospace;
+          color:var(--text);
+          resize:vertical;
+        }
+
+        .wf-media-wheel [data-el="info-badge"]{
+          position:absolute;
+          bottom:20px;
+          left:50%;
+          transform:translateX(-50%);
+          z-index:15;
+          font-family:'Space Mono',monospace;
+          font-size:10px;
+          color:var(--muted);
+          background:rgba(255,255,255,.75);
+          backdrop-filter:blur(8px);
+          padding:6px 16px;
+          border-radius:20px;
+          white-space:nowrap;
+          max-width:calc(100% - 24px);
+          overflow:hidden;
+          text-overflow:ellipsis;
+        }
+
+        .wf-media-wheel [data-el="settings-panel"]::-webkit-scrollbar{width:3px}
+        .wf-media-wheel [data-el="settings-panel"]::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
+
+        @media (max-width: 767px){
+          .mw-scroll-section{height:240vh}
+          .wf-media-wheel [data-el="preview-panel"]{
+            width:180px;
+            left:12px;
+            top:12px;
+          }
+          .wf-media-wheel [data-el="preview-image"]{
+            width:180px;
+            height:126px;
+          }
+          .wf-media-wheel [data-el="settings-btn"]{
+            top:12px;
+            right:12px;
+          }
+          .wf-media-wheel [data-el="settings-panel"]{
+            width:min(300px, calc(100vw - 24px));
+            right:12px;
+            top:56px;
+          }
+          .wf-media-wheel [data-el="rotate-toggle"]{
+            top:12px;
+            padding:6px 14px;
+          }
+          .wf-media-wheel [data-el="info-badge"]{
+            bottom:12px;
+            font-size:9px;
+          }
+        }
+      </style>
+
+      <div data-el="canvas-container"></div>
+      <svg data-el="label-overlay" xmlns="http://www.w3.org/2000/svg"></svg>
+
+      <div data-el="rotate-toggle">
+        <span>Rotate</span>
+        <label class="switch">
+          <input type="checkbox" data-action="toggle-anim" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div data-el="preview-panel">
+        <img data-el="preview-image" src="" alt="">
+        <div data-el="preview-title">Item</div>
+      </div>
+
+      <button type="button" data-el="settings-btn" aria-label="Open settings">
+        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1115.6 12 3.611 3.611 0 0112 15.6z"/></svg>
+      </button>
+
+      <div data-el="settings-panel">
+        <div class="section-title">Camera</div>
+        <div class="sg">
+          <label>Projection</label>
+          <div class="cam-toggle">
+            <button type="button" class="cam-btn active" data-action="cam-type" data-value="perspective">Perspective</button>
+            <button type="button" class="cam-btn" data-action="cam-type" data-value="orthographic">Orthographic</button>
+          </div>
+        </div>
+        <div class="sg">
+          <label>Base Height <span class="v" data-val="camY">6.8</span></label>
+          <input type="range" min="0.1" max="20" step="0.1" value="6.8" data-action="upd" data-key="camY">
+        </div>
+        <div class="sg">
+          <label>Base Distance <span class="v" data-val="camZ">12.8</span></label>
+          <input type="range" min="0.3" max="20" step="0.1" value="12.8" data-action="upd" data-key="camZ">
+        </div>
+        <div class="sg" data-el="fov-group">
+          <label>Base FOV <span class="v" data-val="fov">31</span></label>
+          <input type="range" min="10" max="120" step="1" value="31" data-action="upd" data-key="fov">
+        </div>
+        <div class="sg" data-el="ozoom-group" style="display:none">
+          <label>Ortho Zoom <span class="v" data-val="orthoZoom">1.0</span></label>
+          <input type="range" min="0.5" max="12" step="0.1" value="1.0" data-action="upd" data-key="orthoZoom">
+        </div>
+
+        <div class="section-title">Scroll Camera</div>
+        <div class="sg">
+          <div class="tl">
+            <input type="checkbox" checked data-action="upd-check" data-key="scrollCamEnabled">
+            <span>Enable Scroll Camera</span>
+          </div>
+        </div>
+        <div class="sg">
+          <label>Scroll Start <span class="v" data-val="scrollCamStart">0</span></label>
+          <input type="range" min="0" max="1" step="0.01" value="0" data-action="upd" data-key="scrollCamStart">
+        </div>
+        <div class="sg">
+          <label>Scroll End <span class="v" data-val="scrollCamEnd">1</span></label>
+          <input type="range" min="0" max="1" step="0.01" value="1" data-action="upd" data-key="scrollCamEnd">
+        </div>
+        <div class="sg">
+          <label>Start Height <span class="v" data-val="scrollStartCamY">6.8</span></label>
+          <input type="range" min="0.1" max="20" step="0.1" value="6.8" data-action="upd" data-key="scrollStartCamY">
+        </div>
+        <div class="sg">
+          <label>End Height <span class="v" data-val="scrollEndCamY">2</span></label>
+          <input type="range" min="0.1" max="20" step="0.1" value="2" data-action="upd" data-key="scrollEndCamY">
+        </div>
+        <div class="sg">
+          <label>Start Distance <span class="v" data-val="scrollStartCamZ">12.8</span></label>
+          <input type="range" min="0.3" max="30" step="0.1" value="12.8" data-action="upd" data-key="scrollStartCamZ">
+        </div>
+        <div class="sg">
+          <label>End Distance <span class="v" data-val="scrollEndCamZ">6.5</span></label>
+          <input type="range" min="0.3" max="30" step="0.1" value="6.5" data-action="upd" data-key="scrollEndCamZ">
+        </div>
+        <div class="sg">
+          <label>Start FOV <span class="v" data-val="scrollStartFov">31</span></label>
+          <input type="range" min="10" max="120" step="1" value="31" data-action="upd" data-key="scrollStartFov">
+        </div>
+        <div class="sg">
+          <label>End FOV <span class="v" data-val="scrollEndFov">62</span></label>
+          <input type="range" min="10" max="120" step="1" value="62" data-action="upd" data-key="scrollEndFov">
+        </div>
+
+        <div class="section-title">Hover Camera</div>
+        <div class="sg">
+          <label>Hover X <span class="v" data-val="hoverCamXStrength">1.2</span></label>
+          <input type="range" min="0" max="4" step="0.1" value="1.2" data-action="upd" data-key="hoverCamXStrength">
+        </div>
+        <div class="sg">
+          <label>Hover Y <span class="v" data-val="hoverCamYStrength">0.7</span></label>
+          <input type="range" min="0" max="4" step="0.1" value="0.7" data-action="upd" data-key="hoverCamYStrength">
+        </div>
+
+        <div class="section-title">Media Fit</div>
+        <div class="sg">
+          <label>Global Fit</label>
+          <div class="fit-toggle">
+            <button type="button" class="fit-btn active" data-action="fit-mode" data-value="cover">Cover</button>
+            <button type="button" class="fit-btn" data-action="fit-mode" data-value="contain">Contain</button>
+          </div>
+        </div>
+
+        <div class="section-title">Selector Trigger</div>
+        <div class="sg">
+          <label>Trigger Angle <span class="v" data-val="selectorAngle">325</span></label>
+          <input type="range" min="0" max="359" step="1" value="325" data-action="upd" data-key="selectorAngle">
+        </div>
+        <div class="sg">
+          <label>Tolerance <span class="v" data-val="selectorTolerance">8</span></label>
+          <input type="range" min="1" max="30" step="1" value="8" data-action="upd" data-key="selectorTolerance">
+        </div>
+        <div class="sg">
+          <label>Line Width <span class="v" data-val="selectorLineWidth">2</span></label>
+          <input type="range" min="1" max="8" step="1" value="2" data-action="upd" data-key="selectorLineWidth">
+        </div>
+        <div class="sg">
+          <label>Line Opacity <span class="v" data-val="selectorLineOpacity">0.45</span></label>
+          <input type="range" min="0.05" max="1" step="0.01" value="0.45" data-action="upd" data-key="selectorLineOpacity">
+        </div>
+        <div class="sg">
+          <label>Line Start <span class="v" data-val="selectorStart">0.14</span></label>
+          <input type="range" min="-1" max="2" step="0.01" value="0.14" data-action="upd" data-key="selectorStart">
+        </div>
+        <div class="sg">
+          <label>Line End <span class="v" data-val="selectorEnd">0.50</span></label>
+          <input type="range" min="-1" max="3" step="0.01" value="0.50" data-action="upd" data-key="selectorEnd">
+        </div>
+        <div class="sg">
+          <div class="sr">
+            <label style="margin:0">Line Color</label>
+            <input type="color" value="#111111" data-action="upd-color" data-key="selectorLineColor">
+          </div>
+        </div>
+        <div class="sg">
+          <div class="tl">
+            <input type="checkbox" checked data-action="upd-check" data-key="showSelectorLine">
+            <span>Show Selector Line</span>
+          </div>
+        </div>
+        <div class="sg">
+          <label>Blend Mode</label>
+          <div class="blend-toggle">
+            <button type="button" class="blend-btn active" data-action="blend-mode" data-value="difference">Difference</button>
+            <button type="button" class="blend-btn" data-action="blend-mode" data-value="normal">Normal</button>
+            <button type="button" class="blend-btn" data-action="blend-mode" data-value="screen">Screen</button>
+            <button type="button" class="blend-btn" data-action="blend-mode" data-value="multiply">Multiply</button>
+          </div>
+        </div>
+
+        <div class="section-title">Card</div>
+        <div class="sg">
+          <label>Card Width <span class="v" data-val="cardW">200</span></label>
+          <input type="range" min="80" max="360" value="200" data-action="upd" data-key="cardW">
+        </div>
+        <div class="sg">
+          <label>Card Height <span class="v" data-val="cardH">149</span></label>
+          <input type="range" min="60" max="280" value="149" data-action="upd" data-key="cardH">
+        </div>
+        <div class="sg">
+          <label>Padding <span class="v" data-val="padding">0</span></label>
+          <input type="range" min="0" max="0.3" step="0.01" value="0" data-action="upd" data-key="padding">
+        </div>
+        <div class="sg">
+          <label>Corner Radius <span class="v" data-val="cardCorner">0.5</span></label>
+          <input type="range" min="0" max="0.5" step="0.01" value="0.5" data-action="upd" data-key="cardCorner">
+        </div>
+
+        <div class="section-title">Card Rotation</div>
+        <div class="sg">
+          <label>Tilt X <span class="v" data-val="cardRotX">67</span>°</label>
+          <input type="range" min="-180" max="180" step="1" value="67" data-action="upd" data-key="cardRotX">
+        </div>
+        <div class="sg">
+          <label>Tilt Y <span class="v" data-val="cardRotY">-117</span>°</label>
+          <input type="range" min="-180" max="180" step="1" value="-117" data-action="upd" data-key="cardRotY">
+        </div>
+        <div class="sg">
+          <label>Tilt Z <span class="v" data-val="cardRotZ">57</span>°</label>
+          <input type="range" min="-180" max="180" step="1" value="57" data-action="upd" data-key="cardRotZ">
+        </div>
+
+        <div class="section-title">Wheel</div>
+        <div class="sg">
+          <label>Wheel Radius <span class="v" data-val="radius">2.9</span></label>
+          <input type="range" min="1" max="14" step="0.1" value="2.9" data-action="upd" data-key="radius">
+        </div>
+        <div class="sg">
+          <label>Item Multiplier <span class="v" data-val="multiplier">2</span></label>
+          <input type="range" min="1" max="5" value="2" data-action="upd" data-key="multiplier">
+        </div>
+        <div class="sg">
+          <label>Anim Speed <span class="v" data-val="animSpeed">1.11</span></label>
+          <input type="range" min="0.05" max="2" step="0.01" value="1.11" data-action="upd" data-key="animSpeed">
+        </div>
+
+        <div class="section-title">Appearance</div>
+        <div class="sg">
+          <div class="sr">
+            <label style="margin:0">Background</label>
+            <input type="color" value="#ff0000" data-action="upd-color" data-key="bgColor">
+          </div>
+        </div>
+        <div class="sg">
+          <div class="tl">
+            <input type="checkbox" checked data-action="upd-check" data-key="showLabels">
+            <span>Show Labels &amp; Lines</span>
+          </div>
+        </div>
+        <div class="sg">
+          <div class="tl">
+            <input type="checkbox" checked data-action="upd-check" data-key="showPreview">
+            <span>Show Preview</span>
+          </div>
+        </div>
+        <div class="sg">
+          <div class="tl">
+            <input type="checkbox" checked data-action="upd-check" data-key="showInfoBadge">
+            <span>Show Info Badge</span>
+          </div>
+        </div>
+
+        <div class="section-title">Export</div>
+        <div class="sg">
+          <button type="button" class="cam-btn active" data-action="copy-settings-json">Copy Settings JSON</button>
+        </div>
+        <div class="sg">
+          <textarea data-el="export-output" readonly spellcheck="false"></textarea>
+        </div>
+      </div>
+
+      <div data-el="info-badge">Sticky section Â· Scroll drives camera Â· Hover drifts camera</div>
+    </div>
+  </div>
 <script>
     (function(){
       const THREE_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
@@ -1207,3 +1788,7 @@
     })();
 
 </script>
+</div>
+
+</body>
+</html>

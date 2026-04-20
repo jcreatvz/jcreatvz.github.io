@@ -795,8 +795,8 @@
         CFG.animating = on;
         if (els.animSwitch) els.animSwitch.checked = on;
         els.infoBadge.textContent = on
-          ? 'Sticky section · Scroll drives camera · Hover drifts camera'
-          : 'Paused · Scroll still drives camera';
+          ? 'Sticky section Â· Scroll drives camera Â· Hover drifts camera'
+          : 'Paused Â· Scroll still drives camera';
       }
 
       function toggleSettings(){ els.settingsPanel.classList.toggle('open'); }
@@ -1141,18 +1141,38 @@
           return;
         }
 
+        var called = false;
+        function once(){ if(!called){ called=true; callback(); } }
+
         let existing = document.querySelector('script[data-media-wheel-three="true"]');
         if (!existing) {
           existing = document.createElement('script');
           existing.src = THREE_SRC;
           existing.async = false;
           existing.setAttribute('data-media-wheel-three', 'true');
-          existing.addEventListener('load', callback, { once: true });
+          existing.addEventListener('load', once, { once: true });
+          existing.addEventListener('error', function(){
+            console.error('Media Wheel: Three.js failed to load from CDN');
+          }, { once: true });
           document.head.appendChild(existing);
           return;
         }
 
-        existing.addEventListener('load', callback, { once: true });
+        // Script tag exists — it may have already loaded (load event won't fire again)
+        if (window.THREE) {
+          once();
+          return;
+        }
+
+        existing.addEventListener('load', once, { once: true });
+
+        // Polling fallback: if load event was missed, check periodically
+        var pollCount = 0;
+        var poll = setInterval(function(){
+          pollCount++;
+          if (window.THREE) { clearInterval(poll); once(); }
+          if (pollCount > 60) clearInterval(poll); // give up after ~3s
+        }, 50);
       }
 
       function startBootstrap(){

@@ -41,7 +41,7 @@
         scrollCamEnabled: true,
         scrollCamStart: 0,
         scrollCamEnd: 1,
-        scrollStartCamY: 6.8,
+        scrollStartCamY: 11.6,
         scrollEndCamY: 2,
         scrollStartCamZ: 12.8,
         scrollEndCamZ: 6.5,

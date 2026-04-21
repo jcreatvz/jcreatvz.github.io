@@ -31,10 +31,10 @@ window.MEDIA_WHEEL_CONFIG = {
   scrollCamEnabled: true,
   scrollCamStart: 0,
   scrollCamEnd: 1,
-  scrollStartCamY: 6.8,
-  scrollEndCamY: 2,
+  scrollStartCamY: 17.4,
+  scrollEndCamY: 5.1,
   scrollStartCamZ: 12.8,
-  scrollEndCamZ: 6.5,
+  scrollEndCamZ: 9.2,
   scrollStartFov: 31,
   scrollEndFov: 62
 };

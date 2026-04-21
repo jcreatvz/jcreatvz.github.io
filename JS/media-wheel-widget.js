@@ -1,3 +1,4 @@
+
     (function(){
       const THREE_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
 
@@ -41,7 +42,7 @@
         scrollCamEnabled: true,
         scrollCamStart: 0,
         scrollCamEnd: 1,
-        scrollStartCamY: 11.6,
+        scrollStartCamY: 6.8,
         scrollEndCamY: 2,
         scrollStartCamZ: 12.8,
         scrollEndCamZ: 6.5,
@@ -81,7 +82,7 @@
         selectorEnd: 0.5
       };
 
-      const BASE = [
+      let BASE = [
         {
           title:'Aurelia fractalis',
           sub:'photo sample',
@@ -109,6 +110,28 @@
         { title:'Frostia delicata',     sub:'72.44|88.91|6.3', c:['#558b2f','#aed581','#33691e'] },
         { title:'Viridia nocturna',     sub:'66.28|14.52',     c:['#00695c','#80cbc4','#004d40'] }
       ];
+
+      /* ── Override CFG from window.MEDIA_WHEEL_CONFIG ── */
+      try {
+        var _cfg = window.MEDIA_WHEEL_CONFIG;
+        if (_cfg && typeof _cfg === 'object') {
+          var _applied = [];
+          for (var key in _cfg) {
+            if (key in CFG) { CFG[key] = _cfg[key]; _applied.push(key); }
+          }
+          if (_applied.length) console.log('Media Wheel: applied config overrides:', _applied.join(', '));
+        }
+      } catch (e) { console.warn('Media Wheel: invalid MEDIA_WHEEL_CONFIG', e); }
+
+      /* ── Override items from window.MEDIA_WHEEL_ITEMS ── */
+      try {
+        var _items = window.MEDIA_WHEEL_ITEMS;
+        if (Array.isArray(_items) && _items.length) {
+          BASE.length = 0;
+          _items.forEach(function(it){ BASE.push(it); });
+          console.log('Media Wheel: loaded', BASE.length, 'custom items');
+        }
+      } catch (e) { console.warn('Media Wheel: invalid MEDIA_WHEEL_ITEMS', e); }
 
       const DEG = Math.PI / 180;
       let scene, perspCam, orthoCam, camera, renderer, raycaster, mouse, groundMesh, resizeObserver;
@@ -917,6 +940,11 @@
           if (valEl) valEl.textContent = CFG[key];
         });
 
+        /* Apply bgColor to CSS variable + Three.js scene */
+        root.style.setProperty('--bg', CFG.bgColor);
+        if (scene) scene.background = new THREE.Color(CFG.bgColor);
+        if (groundMesh) groundMesh.material.color.set(CFG.bgColor);
+
         setCamType(CFG.camType);
         setGlobalFit(CFG.globalFit);
         setSelectorBlend(CFG.selectorLineBlend);
@@ -1204,3 +1232,4 @@
         ensureThree(boot);
       }
     })();
+

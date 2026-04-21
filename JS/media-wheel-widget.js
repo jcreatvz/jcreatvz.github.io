@@ -1,5 +1,4 @@
-
-    (function(){
+(function(){
       const THREE_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
 
       function initMediaWheel(root){
@@ -1232,4 +1231,3 @@
         ensureThree(boot);
       }
     })();
-
